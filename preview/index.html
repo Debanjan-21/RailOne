@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RailOne - Unreserved E-Ticket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-navy: #0D2952;
+      --electric-blue: #0066FF;
+      --light-blue-bg: #E0EFFF;
+      --swap-circle: #D6E6FA;
+      --label-blue: #0284C7;
+      --gray-surface: #F6F8FA;
+      --card-border: #ECEFF2;
+      --text-dark: #0F172A;
+      --text-muted: #64748B;
+      --text-placeholder: #B0BEC5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #0B192C;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 10px;
+    }
+
+    .phone-container {
+      width: 100%;
+      max-width: 410px;
+      height: 850px;
+      background: var(--gray-surface);
+      border-radius: 44px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 10px #1E293B;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      height: 38px;
+      background: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      color: #0F172A;
+      font-size: 13px;
+      font-weight: 800;
+      z-index: 10;
+    }
+
+    .screen-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .screen-view.active {
+      display: flex;
+    }
+
+    /* ================================================= */
+    /* SCREEN 1: UNRESERVED E-TICKET (MATCHING SCREENSHOT)*/
+    /* ================================================= */
+    .top-header-bar {
+      padding: 12px 20px 10px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .page-title {
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary-navy);
+      letter-spacing: -0.2px;
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid #D6E6FA;
+      background: white;
+      color: var(--electric-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    /* Main Booking Card */
+    .ticket-card-container {
+      margin: 8px 18px 24px;
+      background: white;
+      border-radius: 26px;
+      border: 1.2px solid var(--card-border);
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(13, 41, 82, 0.04);
+    }
+
+    /* Normal / Season Tabs */
+    .segmented-control {
+      background: #ECEFF3;
+      border-radius: 14px;
+      padding: 3px;
+      display: flex;
+      height: 48px;
+      margin-bottom: 18px;
+    }
+
+    .segment-tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2D3748;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .segment-tab.active {
+      background: white;
+      color: var(--electric-blue);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+    }
+
+    /* Outside Station / At Station Pills */
+    .location-pills {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .loc-pill {
+      flex: 1;
+      height: 44px;
+      border-radius: 22px;
+      border: 1.2px solid #D6DBE1;
+      background: white;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .loc-pill.active {
+      background: var(--electric-blue);
+      border-color: var(--electric-blue);
+      color: white;
+    }
+
+    .info-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      font-size: 10px;
+      font-family: serif;
+      font-style: italic;
+      font-weight: bold;
+    }
+
+    /* From / To Station Input Area */
+    .station-inputs-wrapper {
+      position: relative;
+    }
+
+    .input-group {
+      padding: 4px 0;
+      cursor: pointer;
+    }
+
+    .input-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--label-blue);
+      margin-bottom: 6px;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .train-icon {
+      color: #64748B;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .station-text {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-placeholder);
+      flex: 1;
+      padding-right: 48px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .station-text.has-value {
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .station-divider-line {
+      height: 1px;
+      background: #E2E8F0;
+      margin: 12px 0 10px;
+    }
+
+    /* Floating Circular Swap Button */
+    .swap-circle-btn {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      background: var(--swap-circle);
+      border-radius: 50%;
+      border: none;
+      color: var(--electric-blue);
+      font-size: 18px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 102, 255, 0.15);
+      transition: transform 0.3s ease;
+    }
+
+    .swap-circle-btn:active {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    /* Primary & Secondary Buttons */
+    .proceed-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: 26px;
+      background: var(--electric-blue);
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 32px;
+      box-shadow: 0 6px 18px rgba(0, 102, 255, 0.25);
+      transition: opacity 0.2s;
+    }
+
+    .proceed-btn:hover {
+      opacity: 0.95;
+    }
+
+    .check-trains-btn {
+      width: 100%;
+      height: 50px;
+      border-radius: 25px;
+      background: white;
+      border: 1.5px solid var(--electric-blue);
+      color: var(--electric-blue);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 14px;
+      transition: background 0.2s;
+    }
+
+    .check-trains-btn:hover {
+      background: #F0F6FF;
+    }
+
+    /* Recent Searches Section */
+    .recent-section {
+      padding: 0 20px;
+    }
+
+    .recent-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--primary-navy);
+      letter-spacing: -0.2px;
+      margin-bottom: 12px;
+    }
+
+    .recent-list {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .recent-card {
+      min-width: 175px;
+      background: var(--light-blue-bg);
+      border: 1px solid #D0E4FA;
+      border-radius: 14px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .recent-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .recent-station {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary-navy);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .route-connector {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin: 5px 0;
+    }
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      background: var(--electric-blue);
+      border-radius: 50%;
+    }
+
+    .connector-line {
+      width: 18px;
+      height: 2px;
+      background: #90BFFF;
+    }
+
+    /* ================================================= */
+    /* SCREEN 2: EXACT BOOKING DETAILS SCREEN (MATCHING SS 2) */
+    /* ================================================= */
+    .status-bar.ticket-mode {
+      background: #1A73E8;
+      color: white;
+    }
+
+    .dynamic-island {
+      width: 78px;
+      height: 18px;
+      background: #000000;
+      border-radius: 12px;
+    }
+
+    .battery-icon {
+      border: 1.5px solid currentColor;
+      border-radius: 4px;
+      padding: 0 3px;
+      font-size: 9.5px;
+      font-weight: 800;
+      line-height: 12px;
+      position: relative;
+    }
+
+    .battery-icon::after {
+      content: '';
+      position: absolute;
+      right: -3px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: currentColor;
+      border-radius: 0 1px 1px 0;
+    }
+
+    .booking-app-bar {
+      background: linear-gradient(180deg, #1A73E8 0%, #1565C0 100%);
+      color: white;
+      padding: 10px 16px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      z-index: 10;
+    }
+
+    .app-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-circle-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    .back-circle-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: white;
+    }
+
+    .app-bar-titles {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-bar-main-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+    }
+
+    .app-bar-mobile {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+      margin-top: 1px;
+    }
+
+    .app-bar-menu-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+    }
+
+    .greeting-banner {
+      background: #FFFFFF;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748B;
+      border-bottom: 1px solid #E2E8F0;
+      letter-spacing: 0.1px;
+    }
+
+    .booking-screen-body {
+      padding: 14px 14px 24px;
+      flex: 1;
+      background: #F1F5F9;
+      overflow-y: auto;
+    }
+
+    /* THE DYNAMIC PREVIEW BOX */
+    .dynamic-preview-box {
+      background: linear-gradient(180deg, #1C222B 0%, #12161D 100%);
+      border: 1.5px solid #2AD5C9;
+      border-radius: 14px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(42, 213, 201, 0.2);
+      margin-bottom: 14px;
+    }
+
+    .rail-strip {
+      width: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 0;
+    }
+
+    .rail-left {
+      border-right: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .rail-right {
+      border-left: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .rail-text {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #CBD5E1;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .rail-text.hindi {
+      font-size: 10.5px;
+      letter-spacing: 1.5px;
+    }
+
+    .preview-center-content {
+      flex: 1;
+      padding: 14px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .preview-close-heading {
+      color: #E2E8F0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      margin-bottom: 2px;
+    }
+
+    .countdown-timer {
+      font-size: 40px;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      color: #FF453A;
+      text-shadow: 0 0 16px rgba(255, 69, 58, 0.7), 0 0 32px rgba(255, 69, 58, 0.35);
+      letter-spacing: 3px;
+      line-height: 1.1;
+      margin: 4px 0 6px;
+    }
+
+    .preview-sub-heading {
+      color: #94A3B8;
+      font-size: 11px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .preview-orange-datetime {
+      color: #FF9F0A;
+      font-size: 16.5px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+
+    .preview-code-ref {
+      color: #E2E8F0;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      margin-bottom: 3px;
+    }
+
+    .preview-footer-note {
+      color: #94A3B8;
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    /* THE SEASON TICKET DETAILS CARD */
+    .season-ticket-card {
+      background: #FFFFFF;
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid #ECEFF2;
+      margin-bottom: 14px;
+    }
+
+    .ticket-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .st-category-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #94A3B8;
+    }
+
+    .st-code-val {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1E293B;
+      letter-spacing: 0.5px;
+    }
+
+    .active-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #E8F8EE;
+      padding: 4px 10px;
+      border-radius: 16px;
+    }
+
+    .active-green-dot {
+      width: 7px;
+      height: 7px;
+      background: #22C55E;
+      border-radius: 50%;
+    }
+
+    .active-status-text {
+      font-size: 11px;
+      font-weight: 800;
+      color: #16A34A;
+      letter-spacing: 0.5px;
+    }
+
+    .st-grid-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .st-col {
+      flex: 1;
+    }
+
+    .st-col.text-right {
+      text-align: right;
+    }
+
+    .st-field-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #94A3B8;
+      margin-bottom: 2px;
+    }
+
+    .st-field-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: #1E293B;
+      letter-spacing: -0.1px;
+    }
+
+    .st-via-route {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #64748B;
+      margin: 4px 0 12px;
+    }
+
+    .st-divider {
+      border-top: 1px solid #F1F5F9;
+      margin: 12px 0;
+    }
+
+    .book-again-btn {
+      width: 100%;
+      height: 48px;
+      background: #1565C0;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(21, 101, 192, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .book-again-btn:hover {
+      background: #0D47A1;
+      transform: translateY(-1px);
+    }
+
+    /* Modal Sheet */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .station-sheet {
+      width: 100%;
+      height: 75%;
+      background: white;
+      border-radius: 24px 24px 0 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .station-item {
+      padding: 10px 8px;
+      border-bottom: 1px solid #F1F5F9;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .station-item:hover { background: #F8FAFC; }
+
+    .item-code {
+      width: 50px;
+      height: 34px;
+      background: #EEF2F6;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 13px;
+      color: var(--primary-navy);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone-container">
+    <!-- Top Status Bar (iPhone Dynamic Island & Icons matching SS 2) -->
+    <div class="status-bar" id="topStatusBar">
+      <div style="display:flex; align-items:center; gap:4px;">
+        <span id="statusClock">2:30</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+      </div>
+      <div class="dynamic-island"></div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="font-size:11px; letter-spacing:-1px;">📶</span>
+        <span style="font-size:10.5px; font-weight:800;">5G</span>
+        <span class="battery-icon">85</span>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- SCREEN 1: UNRESERVED E-TICKET (SCREENSHOT UI)  -->
+    <!-- ============================================== -->
+    <div id="screenHome" class="screen-view active">
+      <!-- Centered Header with Close Icon -->
+      <div class="top-header-bar">
+        <div class="page-title">Unreserved E-Ticket</div>
+        <div class="close-btn" onclick="alert('RailOne Main Menu')">✕</div>
+      </div>
+
+      <!-- Main Booking Card -->
+      <div class="ticket-card-container">
+        <!-- Normal / Season Tab -->
+        <div class="segmented-control">
+          <button class="segment-tab active" id="tabNormal" onclick="setTab('Normal')">Normal</button>
+          <button class="segment-tab" id="tabSeason" onclick="setTab('Season')">Season</button>
+        </div>
+
+        <!-- Outside Station / At Station Pills -->
+        <div class="location-pills">
+          <div class="loc-pill active" id="pillOutside" onclick="setLocationMode('outside')">
+            <span>Outside Station</span>
+            <span class="info-circle">i</span>
+          </div>
+          <div class="loc-pill" id="pillAtStation" onclick="setLocationMode('atStation')">
+            <span>At Station</span>
+            <span class="info-circle">i</span>
+          </div>
+        </div>
+
+        <!-- From / To Station Input Box with Circular Swap Button -->
+        <div class="station-inputs-wrapper">
+          <!-- FROM -->
+          <div class="input-group" onclick="openStationModal(true)">
+            <div class="input-label">From</div>
+            <div class="input-row">
+              <span class="train-icon">🚆</span>
+              <span id="srcDisplay" class="station-text has-value">SEALDAH, SDAH</span>
+            </div>
+          </div>
+
+          <div class="station-divider-line"></div>
+
+          <!-- TO -->
+          <div class="input-group" onclick="openStationModal(false)">
+            <div class="input-label">To</div>
+            <div class="input-row">
+              <span class="train-icon">🚆</span>
+              <span id="destDisplay" class="station-text has-value">DUMDUM JN., DDJ</span>
+            </div>
+          </div>
+
+          <!-- Circular Swap Button -->
+          <button class="swap-circle-btn" onclick="swapStations()" title="Swap stations">⇅</button>
+        </div>
+
+        <!-- PROCEED BUTTON -->
+        <button class="proceed-btn" onclick="proceedToBook()">Proceed To Book</button>
+
+        <!-- CHECK UPCOMING TRAINS BUTTON -->
+        <button class="check-trains-btn" onclick="alert('Fetching upcoming trains between stations...')">Check Upcoming Trains</button>
+      </div>
+
+      <!-- Recent Searches -->
+      <div class="recent-section">
+        <div class="recent-title">Recent Searches</div>
+        <div class="recent-list">
+          <!-- Card 1: DDJ -> BT -->
+          <div class="recent-card" onclick="setPreset('DDJ', 'BT')">
+            <div class="recent-station">DUMDUM JN., DDJ</div>
+            <div class="route-connector">
+              <div class="dot"></div>
+              <div class="connector-line"></div>
+              <div class="dot"></div>
+            </div>
+            <div class="recent-station">BARASAT JN., BT</div>
+          </div>
+
+          <!-- Card 2: BT -> DDJ -->
+          <div class="recent-card" onclick="setPreset('BT', 'DDJ')">
+            <div class="recent-station">BARASAT JN., BT</div>
+            <div class="route-connector">
+              <div class="dot"></div>
+              <div class="connector-line"></div>
+              <div class="dot"></div>
+            </div>
+            <div class="recent-station">DUMDUM JN., DDJ</div>
+          </div>
+
+          <!-- Card 3: BP -> DDJ -->
+          <div class="recent-card" onclick="setPreset('BP', 'DDJ')">
+            <div class="recent-station">BARRACKPORE, BP</div>
+            <div class="route-connector">
+              <div class="dot"></div>
+              <div class="connector-line"></div>
+              <div class="dot"></div>
+            </div>
+            <div class="recent-station">DUMDUM JN., DDJ</div>
+          </div>
+
+          <!-- Card 4: SDAH -> BP -->
+          <div class="recent-card" onclick="setPreset('SDAH', 'BP')">
+            <div class="recent-station">SEALDAH, SDAH</div>
+            <div class="route-connector">
+              <div class="dot"></div>
+              <div class="connector-line"></div>
+              <div class="dot"></div>
+            </div>
+            <div class="recent-station">BARRACKPORE, BP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- SCREEN 2: EXACT BOOKING DETAILS SCREEN (SS 2)  -->
+    <!-- ============================================== -->
+    <div id="screenTicket" class="screen-view">
+      <!-- 1. Top Blue App Bar -->
+      <div class="booking-app-bar">
+        <div class="app-bar-left">
+          <div class="back-circle-btn" onclick="goToHome()" title="Back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </div>
+          <div class="app-bar-titles">
+            <div class="app-bar-main-title">Booking Details</div>
+            <div class="app-bar-mobile">Mobile: 8420613892</div>
+          </div>
+        </div>
+        <div class="app-bar-menu-btn" onclick="goToHome()" title="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 2. White Thank You Greeting Banner -->
+      <div class="greeting-banner">
+        Thank You DEBANJAN MAJUMDER, Happy Journey !
+      </div>
+
+      <!-- 3. Scrollable Booking Screen Body -->
+      <div class="booking-screen-body">
+        
+        <!-- THE DYNAMIC PREVIEW BOX (DARK GLOWING CARD) -->
+        <div class="dynamic-preview-box">
+          <!-- Left Rail: INDIAN RAILWAYS -->
+          <div class="rail-strip rail-left">
+            <span class="rail-text">INDIAN RAILWAYS</span>
+          </div>
+
+          <!-- Center Content with 5-Minute Timer & Orange Date -->
+          <div class="preview-center-content">
+            <div class="preview-close-heading">Dynamic preview will close in</div>
+            
+            <!-- 5-MINUTE COUNTDOWN TIMER (Starts from 05:00 down to 00:00) -->
+            <div class="countdown-timer" id="previewTimer">05 : 00</div>
+            
+            <div class="preview-sub-heading">Ticket Booking Date & Time</div>
+            
+            <!-- ORANGE BOOKING DATE & TIME -->
+            <div class="preview-orange-datetime" id="previewOrangeDateTime">27 Oct 2026, 10:23</div>
+            
+            <div class="preview-code-ref" id="previewBookingCode">R27458</div>
+            <div class="preview-footer-note">Ticket is Non-Transferable</div>
+          </div>
+
+          <!-- Right Rail: भारतीय रेल -->
+          <div class="rail-strip rail-right">
+            <span class="rail-text hindi">भारतीय रेल</span>
+          </div>
+        </div>
+
+        <!-- THE WHITE SEASON TICKET DETAILS CARD -->
+        <div class="season-ticket-card">
+          <!-- Top Row: Season Ticket + ACTIVE Status Pill -->
+          <div class="ticket-header-row">
+            <div>
+              <div class="st-category-label">Season Ticket</div>
+              <div class="st-code-val" id="seasonTicketCode">XEDWEHJ0FC</div>
+            </div>
+            <div class="active-status-pill">
+              <span class="active-green-dot"></span>
+              <span class="active-status-text">ACTIVE</span>
+            </div>
+          </div>
+
+          <!-- Row 1: Source & Destination -->
+          <div class="st-grid-row">
+            <div class="st-col">
+              <div class="st-field-label">Source</div>
+              <div class="st-field-value" id="tSrcNameDisplay">DUMDUM JN.</div>
+            </div>
+            <div class="st-col text-right">
+              <div class="st-field-label">Destination</div>
+              <div class="st-field-value" id="tDestNameDisplay">BARASAT JN.</div>
+            </div>
+          </div>
+
+          <!-- Row 2: Distance & Booked on -->
+          <div class="st-grid-row">
+            <div class="st-col">
+              <div class="st-field-label">Distance</div>
+              <div class="st-field-value" id="tDistanceDisplay">16 km</div>
+            </div>
+            <div class="st-col text-right">
+              <div class="st-field-label">Booked on</div>
+              <div class="st-field-value" id="tBookedOnDisplay">27/10/2026 10:23</div>
+            </div>
+          </div>
+
+          <!-- Row 3: Ticket Type & Train Types -->
+          <div class="st-grid-row">
+            <div class="st-col">
+              <div class="st-field-label">Ticket Type</div>
+              <div class="st-field-value" id="tTicketTypeDisplay">MONTHLY</div>
+            </div>
+            <div class="st-col text-right">
+              <div class="st-field-label">Train Types</div>
+              <div class="st-field-value" id="tTrainTypeDisplay">ORDINARY</div>
+            </div>
+          </div>
+
+          <!-- Row 4: Class & Fare -->
+          <div class="st-grid-row">
+            <div class="st-col">
+              <div class="st-field-label">Class</div>
+              <div class="st-field-value" id="tClassDisplay">SECOND</div>
+            </div>
+            <div class="st-col text-right">
+              <div class="st-field-label">Fare</div>
+              <div class="st-field-value" id="tFareDisplay">100.00</div>
+            </div>
+          </div>
+
+          <!-- Row 5: Valid From & Valid Upto (EXACT 30 DAYS FROM CURRENT DATE) -->
+          <div class="st-grid-row">
+            <div class="st-col">
+              <div class="st-field-label">Valid From</div>
+              <div class="st-field-value" id="tValidFromDisplay">27/10/2026</div>
+            </div>
+            <div class="st-col text-right">
+              <div class="st-field-label">Valid Upto</div>
+              <div class="st-field-value" id="tValidUptoDisplay">26/11/2026</div>
+            </div>
+          </div>
+
+          <!-- Row 6: Route Info (Via: DDC) -->
+          <div class="st-via-route">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" y1="3" x2="6" y2="15"></line>
+              <circle cx="18" cy="6" r="3"></circle>
+              <circle cx="6" cy="18" r="3"></circle>
+              <path d="M18 9a9 9 0 0 1-9 9"></path>
+            </svg>
+            <span id="tViaRouteDisplay">Via: DDC</span>
+          </div>
+
+          <!-- Subtle Divider -->
+          <div class="st-divider"></div>
+
+          <!-- Row 7: Passenger Name & Age -->
+          <div class="st-grid-row">
+            <div class="st-col">
+              <div class="st-field-label">Name</div>
+              <div class="st-field-value" id="tPassengerNameDisplay">DEBANJAN MAJUMDER</div>
+            </div>
+            <div class="st-col text-right">
+              <div class="st-field-label">Age</div>
+              <div class="st-field-value" id="tPassengerAgeDisplay">23 years</div>
+            </div>
+          </div>
+
+          <!-- Row 8: ID Type* & ID Number -->
+          <div class="st-grid-row" style="margin-bottom: 2px;">
+            <div class="st-col">
+              <div class="st-field-label">ID Type*</div>
+              <div class="st-field-value" style="color: #64748B; font-size: 13.5px;" id="tIdTypeDisplay">STUDENT ID</div>
+            </div>
+            <div class="st-col text-right">
+              <div class="st-field-label">ID Number</div>
+              <div class="st-field-value" style="color: #64748B; font-size: 13.5px;" id="tIdNumberDisplay">•••• 3892</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Station Selection Modal -->
+    <div id="stationModal" class="modal-overlay" onclick="closeStationModal(event)">
+      <div class="station-sheet" onclick="event.stopPropagation()">
+        <div style="width:40px; height:4px; background:#CBD5E1; border-radius:2px; margin:0 auto 12px;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="font-size:16px; font-weight:800; color:var(--primary-navy);" id="modalTitle">Select Station</div>
+          <button onclick="closeModal()" style="border:none; background:none; font-size:18px; cursor:pointer;">✕</button>
+        </div>
+        <input type="text" id="stationSearchInput" style="width:100%; padding:10px 14px; background:#F1F5F9; border:none; border-radius:10px; font-size:13px; outline:none; margin-bottom:12px;" placeholder="Search station by name or code..." oninput="filterStations()">
+        <div style="flex:1; overflow-y:auto;" id="modalStationList"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const stations = [
+      // Sealdah to Krishnanagar City Jn (Mainline)
+      { code: 'SDAH', name: 'SEALDAH', city: 'Kolkata' },
+      { code: 'BNXR', name: 'BIDHANNAGAR ROAD', city: 'Kolkata' },
+      { code: 'DDJ', name: 'DUMDUM JN.', city: 'Kolkata' },
+      { code: 'BLH', name: 'BELGHARIA', city: 'Kolkata' },
+      { code: 'AGP', name: 'AGARPARA', city: 'Kolkata' },
+      { code: 'SEP', name: 'SODEPUR', city: 'Kolkata' },
+      { code: 'KDH', name: 'KHARDAHA', city: 'Kolkata' },
+      { code: 'TGH', name: 'TITAGARH', city: 'Kolkata' },
+      { code: 'BP', name: 'BARRACKPORE', city: 'Kolkata' },
+      { code: 'PTF', name: 'PALTA', city: 'North 24 Parganas' },
+      { code: 'IP', name: 'ICHHAPUR', city: 'North 24 Parganas' },
+      { code: 'SNR', name: 'SHYAMNAGAR', city: 'North 24 Parganas' },
+      { code: 'JGDL', name: 'JAGADDAL', city: 'North 24 Parganas' },
+      { code: 'KNR', name: 'KANKINARA', city: 'North 24 Parganas' },
+      { code: 'NH', name: 'NAIHATI JN.', city: 'North 24 Parganas' },
+      { code: 'HLHR', name: 'HALISAHAR', city: 'North 24 Parganas' },
+      { code: 'KPA', name: 'KANCHRAPARA', city: 'North 24 Parganas' },
+      { code: 'KYI', name: 'KALYANI', city: 'Nadia' },
+      { code: 'MDPR', name: 'MADANPUR', city: 'Nadia' },
+      { code: 'SMX', name: 'SIMURALI', city: 'Nadia' },
+      { code: 'PLPR', name: 'PALPARA', city: 'Nadia' },
+      { code: 'CDH', name: 'CHAKDAHA', city: 'Nadia' },
+      { code: 'PRDB', name: 'PAYRADANGA', city: 'Nadia' },
+      { code: 'RHA', name: 'RANAGHAT JN.', city: 'Nadia' },
+      { code: 'KLNP', name: 'KALINARAYANPUR JN.', city: 'Nadia' },
+      { code: 'BIJ', name: 'BIRNAGAR', city: 'Nadia' },
+      { code: 'THP', name: 'TAHERPUR', city: 'Nadia' },
+      { code: 'BDZ', name: 'BADKULLA', city: 'Nadia' },
+      { code: 'KNJ', name: 'KRISHNANAGAR CITY JN.', city: 'Nadia' },
+
+      // Sealdah to Bangaon Jn (Branching at Dum Dum)
+      { code: 'DDC', name: 'DUM DUM CANTT.', city: 'Kolkata' },
+      { code: 'DGNR', name: 'DURGANAGAR', city: 'Kolkata' },
+      { code: 'BBT', name: 'BIRATI', city: 'Kolkata' },
+      { code: 'BRPK', name: 'BISHARPARA KODALIYA', city: 'Kolkata' },
+      { code: 'NBE', name: 'NEW BARRACKPORE', city: 'Kolkata' },
+      { code: 'MMG', name: 'MADHYAMGRAM', city: 'Kolkata' },
+      { code: 'HHR', name: 'HRIDAYPUR', city: 'Kolkata' },
+      { code: 'BT', name: 'BARASAT JN.', city: 'Kolkata' },
+      { code: 'BMG', name: 'BAMANGACHHI', city: 'North 24 Parganas' },
+      { code: 'DTK', name: 'DATTAPUKUR', city: 'North 24 Parganas' },
+      { code: 'BIRA', name: 'BIRA', city: 'North 24 Parganas' },
+      { code: 'GUMA', name: 'GUMA', city: 'North 24 Parganas' },
+      { code: 'ASKR', name: 'ASHOKNAGAR ROAD', city: 'North 24 Parganas' },
+      { code: 'HB', name: 'HABRA', city: 'North 24 Parganas' },
+      { code: 'SNHT', name: 'SANHATI', city: 'North 24 Parganas' },
+      { code: 'MSL', name: 'MACHHALANDAPUR', city: 'North 24 Parganas' },
+      { code: 'GBG', name: 'GOBARDANGA', city: 'North 24 Parganas' },
+      { code: 'TKNR', name: 'THAKURNAGAR', city: 'North 24 Parganas' },
+      { code: 'CDP', name: 'CHANDPARA', city: 'North 24 Parganas' },
+      { code: 'BNAA', name: 'BIBHUTI BHUSHAN', city: 'North 24 Parganas' },
+      { code: 'BNJ', name: 'BANGAON JN.', city: 'North 24 Parganas' },
+
+      // Other Hubs
+      { code: 'HWH', name: 'HOWRAH JN.', city: 'Kolkata' },
+      { code: 'KOAA', name: 'KOLKATA', city: 'Kolkata' },
+      { code: 'NDLS', name: 'NEW DELHI', city: 'Delhi' },
+      { code: 'DLI', name: 'DELHI JN', city: 'Delhi' },
+      { code: 'CSMT', name: 'MUMBAI CSMT', city: 'Mumbai' },
+      { code: 'PUNE', name: 'PUNE JN', city: 'Pune' },
+      { code: 'MAS', name: 'MGR CHENNAI CTL', city: 'Chennai' },
+      { code: 'SBC', name: 'KSR BENGALURU', city: 'Bengaluru' },
+      { code: 'PNBE', name: 'PATNA JN', city: 'Patna' }
+    ];
+
+    // Accurate Railway Track Distances (Symmetrical lookup: sorted alphabetically)
+    const exactDistances = {
+      // Direct chord / bypass & major pairs
+      'BT-DDJ': 16,    // Barasat <-> Dumdum = 16 km
+      'BP-DDJ': 16,    // Barrackpore <-> Dumdum = 16 km
+      'BP-BT': 18,     // Barrackpore <-> Barasat = 18 km
+      'DDJ-SDAH': 7,   // Dumdum <-> Sealdah = 7 km
+      'BT-SDAH': 22,   // Barasat <-> Sealdah = 22 km
+      'BP-SDAH': 23,   // Barrackpore <-> Sealdah = 23 km
+      'DDJ-HWH': 12,   // Dumdum <-> Howrah = 12 km
+      'BP-HWH': 23,    // Barrackpore <-> Howrah = 23 km
+      'BT-HWH': 26,    // Barasat <-> Howrah = 26 km
+      'HWH-SDAH': 5,   // Howrah <-> Sealdah = 5 km
+      'DDJ-KOAA': 5,   // Dumdum <-> Kolkata = 5 km
+      'BP-KOAA': 19,   // Barrackpore <-> Kolkata = 19 km
+      'BT-KOAA': 19,   // Barasat <-> Kolkata = 19 km
+      'KOAA-SDAH': 7,  // Kolkata <-> Sealdah = 7 km
+      'HWH-KOAA': 8,   // Howrah <-> Kolkata = 8 km
+
+      // Intercity & Major Routes
+      'DLI-NDLS': 3,
+      'NDLS-NZM': 7,
+      'ANVT-NDLS': 12,
+      'AGC-NDLS': 195,
+      'JP-NDLS': 303,
+      'CDG-NDLS': 244,
+      'ASR-NDLS': 448,
+      'CNB-NDLS': 440,
+      'LKO-NDLS': 512,
+      'NDLS-PRYJ': 634,
+      'BSB-NDLS': 758,
+      'DDU-NDLS': 774,
+      'NDLS-PNBE': 998,
+      'HWH-NDLS': 1447,
+      'NDLS-SDAH': 1453,
+      'JAT-NDLS': 577,
+      'BPL-NDLS': 701,
+      'CSMT-NDLS': 1543,
+
+      // Mumbai
+      'CSMT-DR': 9,
+      'CSMT-TNA': 34,
+      'CSMT-KYN': 54,
+      'CSMT-PUNE': 192,
+      'BDTS-MMCT': 10,
+      'DR-MMCT': 6,
+      'MMCT-TNA': 32,
+      'KYN-MMCT': 51,
+      'MMCT-ST': 263,
+      'BRC-MMCT': 392,
+      'ADI-MMCT': 491,
+      'CSMT-SUR': 455,
+
+      // Eastern / South Eastern
+      'BBS-HWH': 437,
+      'HWH-PURI': 500,
+      'HWH-PNBE': 532,
+      'HWH-R': 831,
+      'HWH-NGP': 1131,
+      'GHY-HWH': 985,
+      'HWH-MAS': 1659,
+      'HWH-SBC': 1954,
+
+      // Southern
+      'MAS-MS': 2,
+      'MAS-SBC': 357,
+      'BZA-MAS': 431,
+      'CBE-MAS': 497,
+      'ERS-MAS': 696,
+      'MAS-TVC': 790,
+      'MYS-SBC': 139,
+      'SBC-YPR': 6,
+      'SBC-SMVB': 10,
+      'HYB-SBC': 624,
+      'HYB-SC': 9,
+      'BZA-SC': 349,
+      'BZA-VSKP': 350
+    };
+
+    // Official Eastern Railway Kilometer Markers from Sealdah (SDAH = 0)
+    const mainlineKm = {
+      'SDAH': 0, 'BNXR': 4, 'DDJ': 7, 'BLH': 12, 'AGP': 14,
+      'SEP': 16, 'KDH': 19, 'TGH': 20, 'BP': 23, 'PTF': 25,
+      'IP': 27, 'SNR': 30, 'JGDL': 34, 'KNR': 35, 'NH': 38,
+      'HLHR': 42, 'KPA': 45, 'KYI': 48, 'MDPR': 53, 'SMX': 57,
+      'PLPR': 60, 'CDH': 62, 'PRDB': 68, 'RHA': 74, 'KLNP': 78,
+      'BIJ': 82, 'THP': 84, 'BDZ': 89, 'KNJ': 100
+    };
+
+    const bangaonKm = {
+      'SDAH': 0, 'BNXR': 4, 'DDJ': 7, 'DDC': 10, 'DGNR': 11,
+      'BBT': 13, 'BRPK': 15, 'NBE': 16, 'MMG': 18, 'HHR': 20,
+      'BT': 23, 'BMG': 26, 'DTK': 30, 'BIRA': 34, 'GUMA': 37,
+      'ASKR': 41, 'HB': 45, 'SNHT': 49, 'MSL': 53, 'GBG': 57,
+      'TKNR': 62, 'CDP': 67, 'BNAA': 72, 'BNJ': 77
+    };
+
+    function calculateDistance(srcCode, destCode) {
+      if (srcCode === destCode) return 0;
+      const key = [srcCode, destCode].sort().join('-');
+      if (exactDistances[key] !== undefined) {
+        return exactDistances[key];
+      }
+
+      // Check Sealdah - Krishnanagar line
+      if (mainlineKm[srcCode] !== undefined && mainlineKm[destCode] !== undefined) {
+        const diff = Math.abs(mainlineKm[srcCode] - mainlineKm[destCode]);
+        return diff === 0 ? 5 : diff;
+      }
+
+      // Check Sealdah - Bangaon line
+      if (bangaonKm[srcCode] !== undefined && bangaonKm[destCode] !== undefined) {
+        const diff = Math.abs(bangaonKm[srcCode] - bangaonKm[destCode]);
+        return diff === 0 ? 5 : diff;
+      }
+
+      // Cross branch (connects at Dum Dum Junction, km 7)
+      if (mainlineKm[srcCode] !== undefined && bangaonKm[destCode] !== undefined) {
+        return Math.abs(mainlineKm[srcCode] - 7) + Math.abs(bangaonKm[destCode] - 7);
+      }
+      if (bangaonKm[srcCode] !== undefined && mainlineKm[destCode] !== undefined) {
+        return Math.abs(bangaonKm[srcCode] - 7) + Math.abs(mainlineKm[destCode] - 7);
+      }
+
+      const hash = key.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      return 300 + (hash * 17) % 1200;
+    }
+
+    let currentSource = { code: 'DDJ', name: 'DUMDUM JN.', city: 'Kolkata' };
+    let currentDest = { code: 'BT', name: 'BARASAT JN.', city: 'Kolkata' };
+    let isSelectingSource = true;
+
+    // 5-minute Countdown Timer (Starts from 5min and goes to 0)
+    let countdownRemaining = 300; // 300 seconds = 5 minutes
+    let countdownTimer = null;
+
+    function renderInputs() {
+      const srcEl = document.getElementById('srcDisplay');
+      const destEl = document.getElementById('destDisplay');
+
+      if (currentSource) {
+        srcEl.textContent = `${currentSource.name}, ${currentSource.code}`;
+        srcEl.classList.add('has-value');
+      } else {
+        srcEl.textContent = 'Source';
+        srcEl.classList.remove('has-value');
+      }
+
+      if (currentDest) {
+        destEl.textContent = `${currentDest.name}, ${currentDest.code}`;
+        destEl.classList.add('has-value');
+      } else {
+        destEl.textContent = 'Destination';
+        destEl.classList.remove('has-value');
+      }
+    }
+
+    function setTab(tab) {
+      document.getElementById('tabNormal').classList.toggle('active', tab === 'Normal');
+      document.getElementById('tabSeason').classList.toggle('active', tab === 'Season');
+    }
+
+    function setLocationMode(mode) {
+      document.getElementById('pillOutside').classList.toggle('active', mode === 'outside');
+      document.getElementById('pillAtStation').classList.toggle('active', mode === 'atStation');
+    }
+
+    function swapStations() {
+      const temp = currentSource;
+      currentSource = currentDest;
+      currentDest = temp;
+      renderInputs();
+    }
+
+    function setPreset(srcCode, destCode) {
+      currentSource = stations.find(s => s.code === srcCode) || { code: srcCode, name: srcCode };
+      currentDest = stations.find(s => s.code === destCode) || { code: destCode, name: destCode };
+      renderInputs();
+    }
+
+    function openStationModal(isSource) {
+      isSelectingSource = isSource;
+      document.getElementById('modalTitle').textContent = isSource ? 'Select Source Station' : 'Select Destination Station';
+      document.getElementById('stationSearchInput').value = '';
+      filterStations();
+      document.getElementById('stationModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('stationModal').classList.remove('open');
+    }
+
+    function closeStationModal(e) {
+      if (e.target.id === 'stationModal') closeModal();
+    }
+
+    function filterStations() {
+      const q = document.getElementById('stationSearchInput').value.toLowerCase();
+      const list = document.getElementById('modalStationList');
+      list.innerHTML = '';
+
+      const filtered = stations.filter(s =>
+        s.code.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+      );
+
+      filtered.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'station-item';
+        item.innerHTML = `
+          <div class="item-code">${s.code}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:14px; color:#0F172A;">${s.name}</div>
+            <div style="font-size:11px; color:#64748B;">${s.city}</div>
+          </div>
+        `;
+        item.onclick = () => {
+          if (isSelectingSource) currentSource = s;
+          else currentDest = s;
+          renderInputs();
+          closeModal();
+        };
+        list.appendChild(item);
+      });
+    }
+
+    // Start 5-Minute Countdown Timer (300 seconds down to 0)
+    function startCountdown() {
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownRemaining = 300; // 5 minutes
+      updateCountdownDisplay();
+
+      countdownTimer = setInterval(() => {
+        if (countdownRemaining > 0) {
+          countdownRemaining--;
+          updateCountdownDisplay();
+        } else {
+          clearInterval(countdownTimer);
+        }
+      }, 1000);
+    }
+
+    function updateCountdownDisplay() {
+      const mins = Math.floor(countdownRemaining / 60);
+      const secs = countdownRemaining % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      const timerEl = document.getElementById('previewTimer');
+      if (timerEl) {
+        timerEl.textContent = `${pad(mins)} : ${pad(secs)}`;
+      }
+    }
+
+    // PROCEED TO TICKET (SCREEN 2)
+    function proceedToBook() {
+      if (!currentSource || !currentDest) {
+        alert('Please select both Source and Destination stations.');
+        return;
+      }
+      if (currentSource.code === currentDest.code) {
+        alert('Source and destination cannot be the same!');
+        return;
+      }
+
+      const now = new Date();
+
+      // Random time: random hour (06 to 21) and random minute (00 to 59)
+      const randomHour = Math.floor(Math.random() * 16) + 6;
+      const randomMinute = Math.floor(Math.random() * 60);
+
+      // Ticket booking date: exact 3 days before current date with random time
+      const bookingDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3, randomHour, randomMinute);
+
+      // Valid from date: same as ticket booking date
+      const validFromDate = bookingDate;
+
+      // EXACT 30 DAYS FROM CURRENT DATE:
+      const validUpto = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+      
+      const pad = (n) => String(n).padStart(2, '0');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      const formatDate = (d) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+      const formatDateTime = (d) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      const formatOrangeDate = (d) => `${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+      // Populate Ticket Data exactly as in Screenshot 2
+      document.getElementById('tSrcNameDisplay').textContent = currentSource.name;
+      document.getElementById('tDestNameDisplay').textContent = currentDest.name;
+
+      const dist = calculateDistance(currentSource.code, currentDest.code);
+      document.getElementById('tDistanceDisplay').textContent = `${dist} km`;
+
+      document.getElementById('previewOrangeDateTime').textContent = formatOrangeDate(bookingDate);
+      document.getElementById('tBookedOnDisplay').textContent = formatDateTime(bookingDate);
+      document.getElementById('tValidFromDisplay').textContent = formatDate(validFromDate);
+      document.getElementById('tValidUptoDisplay').textContent = formatDate(validUpto);
+
+      // Start 5-Minute Timer
+      startCountdown();
+
+      // Switch Screens & Header Style
+      document.getElementById('topStatusBar').classList.add('ticket-mode');
+      document.getElementById('screenHome').classList.remove('active');
+      document.getElementById('screenTicket').classList.add('active');
+    }
+
+    function goToHome() {
+      if (countdownTimer) clearInterval(countdownTimer);
+      document.getElementById('topStatusBar').classList.remove('ticket-mode');
+      document.getElementById('screenTicket').classList.remove('active');
+      document.getElementById('screenHome').classList.add('active');
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const hours12 = now.getHours() % 12 || 12;
+      document.getElementById('statusClock').textContent = `${hours12}:${pad(now.getMinutes())}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    renderInputs();
+  </script>
+</body>
+</html>
